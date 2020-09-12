@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Project ignores
+*.csv
+settings.py
+.DS_Store
+settings.json
+
 # C extensions
 *.so
 
