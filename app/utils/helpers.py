@@ -1,6 +1,7 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 import logging
+import os
 import sys
 
 import pandas.io.sql as psql
@@ -27,6 +28,9 @@ def extract_dataframe(sql, params=None):
 
 
 def get_database_connection():
+    db_conn = os.environ.get('DB_CONN')
+    if db_conn:
+        return psycopg2.connect(**db_conn)
     return psycopg2.connect(**settings.DB_CONN)
 
 
