@@ -1,3 +1,5 @@
+#!/usr/bin/python3.8
+# -*- coding: utf-8 -*-
 ALTER_ETHICS_REPORT_SQL = """
 alter table raw.ethics_report
     add column id serial,
