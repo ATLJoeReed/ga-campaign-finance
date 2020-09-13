@@ -20,9 +20,14 @@ def process(conn, logger):
     logger.info('Loading data into dataframe')
     df = pd.concat(map(pd.read_csv, glob.glob(os.path.join('./extracted_files/', "*.csv"))), sort=True) # noqa
     df.columns = map(str.lower, df.columns)
+    num_loaded = df.shape[0]
+    logger.info(f'Loaded {num_loaded:,} contributions')
     logger.info('Cleaning data')
-    df.replace('\"', ' ', regex=True, inplace=True)
+    # Both of the below replaces are needed to get the data inshape so it can
+    # be loaded into Postgres.
+    # Make sure the delimiter is not present in the data...
     df.replace('\|', ' ', regex=True, inplace=True) # noqa
+    # Removing tab and line breaks...
     df.replace(to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value=["", ""], regex=True, inplace=True) # noqa 
 
     df.to_csv(file_name, sep="|", index=False, header=False)
@@ -36,6 +41,9 @@ def process(conn, logger):
         cursor.copy_from(f, 'raw.ethics_report', sep="|")
         logger.info('Adding id and ukey fields')
         cursor.execute(constants_sql.ALTER_ETHICS_REPORT_SQL)
+        conn.commit()
+        logger.info('Moving data from RAW schema to STAGE schema')
+        cursor.execute(constants_sql.MOVE_DATA_TO_STAGE_SQL)
         conn.commit()
     except Exception as e:
         logger.debug(f'Error loading data: {e}')

@@ -2,6 +2,31 @@ set search_path to raw, stage, working, campaign_finance;
 
 show search_path;
 
+
+------------------------------------------------------------------------------------------------------------------------
+-- Put the NULLs back inplace...
+------------------------------------------------------------------------------------------------------------------------
+update stage.ethics_report set committee_name = null where coalesce(committee_name, '') = '';
+update stage.ethics_report set candidate_firstname = null where coalesce(candidate_firstname, '') = '';
+update stage.ethics_report set candidate_middlename = null where coalesce(candidate_middlename, '') = '';
+update stage.ethics_report set candidate_lastname = null where coalesce(candidate_lastname, '') = '';
+update stage.ethics_report set candidate_suffix = null where coalesce(candidate_suffix, '') = '';
+update stage.ethics_report set firstname = null where coalesce(firstname, '') = '';
+update stage.ethics_report set lastname = null where coalesce(lastname, '') = '';
+update stage.ethics_report set employer = null where coalesce(employer, '') = '';
+update stage.ethics_report set occupation = null where coalesce(occupation, '') = '';
+update stage.ethics_report set address = null where coalesce(address, '') = '';
+update stage.ethics_report set city = null where coalesce(city, '') = '';
+update stage.ethics_report set state = null where coalesce(state, '') = '';
+update stage.ethics_report set zip = null where coalesce(zip, '') = '';
+update stage.ethics_report set pac = null where coalesce(pac, '') = '';
+update stage.ethics_report set election = null where coalesce(election, '') = '';
+update stage.ethics_report set in_kind_description = null where coalesce(in_kind_description, '') = '';
+
+select *
+from stage.ethics_report;
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Cleanup "" in name fields...
 ------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +48,10 @@ update stage.ethics_report
 update stage.ethics_report
     set lastname = trim(regexp_replace(replace(lastname, '"', ''), '\s+', ' ', 'g'));
 
+-- Committee name...
+update stage.ethics_report
+    set committee_name = trim(regexp_replace(replace(committee_name, '"', ''), '\s+', ' ', 'g'));
+
 select *
 from stage.ethics_report
 limit 5000;
@@ -42,13 +71,15 @@ limit 5000;
 select *
 from working.clean_states;
 
-
 select ukey, address, city, state, zip
 from stage.ethics_report as a
     inner join working.clean_states as b
         on a.state = b.input_state
 where b.corrected_state is null
 order by state, zip;
+
+update stage.ethics_report
+    set state = upper(trim(state));
 
 update stage.ethics_report
     set state = b.corrected_state
@@ -71,6 +102,10 @@ update stage.ethics_report
     set state = 'GA'
 where city = 'Crawfordville'
     and zip = '30631';
+
+update stage.ethics_report
+    set state = 'GA'
+where upper(trim(state)) = 'GEORGIA';
 
 select ukey, address, city, state, zip
 from stage.ethics_report
@@ -101,6 +136,11 @@ order by state, zip;
 
 -- MANUAL EDIT A FEW WITH DATAGRIP...
 
+select ukey, address, city, state, zip
+from stage.ethics_report
+where length(state) > 2
+order by state;
+
 select state, count(*) as cnt
 from stage.ethics_report
 group by state
@@ -127,6 +167,7 @@ where coalesce(donation_type, '') = ''
 --     and coalesce(firstname, '') <> ''
 -- limit 5000;
 
+-- RESET
 update stage.ethics_report
     set donation_type = null;
 
@@ -312,6 +353,17 @@ order by lastname;
 
 -- truncate table campaign_finance.fact_contributions;
 
+delete
+-- select count(*) as cnt
+from campaign_finance.fact_contributions
+where extract(year from contribution_date) = 2020;
+-- 71287
+
+select count(*) as cnt
+from stage.ethics_report
+where extract(year from contribution_date) = 2020;
+-- 71328
+
 insert into campaign_finance.fact_contributions
     (ukey, filerid, donation_type, firstname, lastname, employer, occupation, address,
     city, state, zip, contribution_date, contribution_type, pac, election, election_year,
@@ -341,6 +393,7 @@ order by filerid, contribution_type, contribution_date;
 
 select *
 from campaign_finance.fact_contributions
+where extract(year from contribution_date) != 2020
 limit 5000;
 
 
@@ -351,22 +404,40 @@ where filerid = 'C2018000163';
 
 select count(distinct filerid) as cnt
 from stage.ethics_report;
--- 1506
+-- 777
+
+-- truncate table campaign_finance.dim_campaigns;
 
 insert into campaign_finance.dim_campaigns
     (filerid, committee_name, candidate_firstname, candidate_middlename, candidate_lastname, candidate_suffix)
 select distinct
-    filerid,
-    committee_name,
-    candidate_firstname,
-    candidate_middlename,
-    candidate_lastname,
-    candidate_suffix
-from stage.ethics_report
-order by filerid;
+    a.filerid,
+    a.committee_name,
+    a.candidate_firstname,
+    a.candidate_middlename,
+    a.candidate_lastname,
+    a.candidate_suffix
+from stage.ethics_report as a
+    left join campaign_finance.dim_campaigns as b
+        on a.filerid = b.filerid
+where b.filerid is null
+order by a.filerid;
+
+select *
+from campaign_finance.dim_campaigns
+order by ymd desc;
 
 select *
 from campaign_finance.dim_campaigns;
+
+update campaign_finance.dim_campaigns set committee_name = null where coalesce(committee_name, '') = '';
+update campaign_finance.dim_campaigns set candidate_firstname = null where coalesce(candidate_firstname, '') = '';
+update campaign_finance.dim_campaigns set candidate_middlename = null where coalesce(candidate_middlename, '') = '';
+update campaign_finance.dim_campaigns set candidate_lastname = null where coalesce(candidate_lastname, '') = '';
+update campaign_finance.dim_campaigns set candidate_suffix = null where coalesce(candidate_suffix, '') = '';
+
+
+
 
 update campaign_finance.dim_campaigns
     set is_pac = False;

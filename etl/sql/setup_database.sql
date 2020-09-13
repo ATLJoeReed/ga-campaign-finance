@@ -104,6 +104,7 @@ drop table if exists campaign_finance.dim_campaigns;
 create table campaign_finance.dim_campaigns
 (
     filerid text primary key,
+    ymd timestamp default now(),
     is_pac bool,
     committee_name text,
     candidate_firstname text,

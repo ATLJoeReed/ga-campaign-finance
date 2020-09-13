@@ -17,7 +17,7 @@ from raw.ethics_report_2020;
 --    * 2019 - Qty: 109,327
 
 
---    * 2020 - Qty: 71287
+--    * 2020 - Qty: 71,287
 
 -- Building a unique key so we can always look back at the raw data...
 
@@ -86,8 +86,3 @@ order by contribution_year, contribution_type;
 select *
 from stage.ethics_report
 limit 5000;
-
-
-
-
-
