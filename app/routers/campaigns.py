@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.utils import constants_sql, helpers
+from app.utils import constants, constants_sql, helpers
 
 
 router = APIRouter()
@@ -61,13 +61,15 @@ def get_campaign_summary(filerid: str):
     sql = constants_sql.GET_CAMPAIGH_SUMMARY_SQL
     campaign_summary = helpers.extract_data(sql, params)
 
-    results = {
-        'filerid': campaign_summary[0].get('filerid'),
-        'committee_name': campaign_summary[0].get('committee_name'),
-        'candidate_name': campaign_summary[0].get('candidate_name'),
-        'total': campaign_summary[0].get('total_contributions'),
-        'top_5_corporates': top_5_corporatations,
-        'top_5_pacs': top_5_pacs,
-        'breakdown': breakout,
-    }
-    return results
+    if campaign_summary:
+        return {
+            'filerid': campaign_summary[0].get('filerid'),
+            'committee_name': campaign_summary[0].get('committee_name'),
+            'candidate_name': campaign_summary[0].get('candidate_name'),
+            'total': campaign_summary[0].get('total_contributions'),
+            'top_5_corporates': top_5_corporatations,
+            'top_5_pacs': top_5_pacs,
+            'breakdown': breakout,
+        }
+    else:
+        return constants.CAMPAIGN_SUMMARY_SHELL
