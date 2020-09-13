@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI
 
-from routers import campaigns, health_check
+from app.routers import campaigns, health_check
 
 
 app = FastAPI(

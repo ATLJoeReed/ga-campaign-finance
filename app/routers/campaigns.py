@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from utils import constants_sql, helpers
+from app.utils import constants_sql, helpers
 
 
 router = APIRouter()

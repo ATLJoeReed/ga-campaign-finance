@@ -6,7 +6,7 @@ import sys
 import pandas.io.sql as psql
 import psycopg2
 
-from utils import settings
+from app.utils import settings
 
 
 def extract_data(sql, params=None):
