@@ -26,14 +26,13 @@ def extract_dataframe(sql, params=None):
 
 
 def get_database_connection():
-    db_conn = {
-        "database": os.environ.get('DATABASE'),
-        "user": os.environ.get('USER'),
-        "password": os.environ.get('PASSWORD'),
-        "host": os.environ.get('HOST'),
-        "port": os.environ.get('PORT'),
-    }
-    return psycopg2.connect(**db_conn)
+    return psycopg2.connect(
+        dbname=os.environ.get('DATABASE'),
+        user=os.environ.get('USER'),
+        password=os.environ.get('PASSWORD'),
+        host=os.environ.get('HOST'),
+        port=os.environ.get('PORT')
+    )
 
 
 def setup_logger_stdout(logger_name):
