@@ -7,8 +7,6 @@ import sys
 import pandas.io.sql as psql
 import psycopg2
 
-from app.utils import settings
-
 
 def extract_data(sql, params=None):
     df = extract_dataframe(sql, params)
@@ -29,9 +27,7 @@ def extract_dataframe(sql, params=None):
 
 def get_database_connection():
     db_conn = os.environ.get('DB_CONN')
-    if db_conn:
-        return psycopg2.connect(**db_conn)
-    return psycopg2.connect(**settings.DB_CONN)
+    return psycopg2.connect(**db_conn)
 
 
 def setup_logger_stdout(logger_name):
