@@ -30,8 +30,8 @@ def get_database_connection():
         dbname=os.environ.get('DATABASE'),
         user=os.environ.get('USER'),
         password=os.environ.get('PASSWORD'),
-        host=os.environ.get('HOST'),
-        port=os.environ.get('PORT')
+        host=os.environ.get('HOST')
+        # port=os.environ.get('PORT')
     )
 
 
