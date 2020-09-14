@@ -1,10 +1,10 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 CAMPAIGN_SUMMARY_SHELL = {
-    'filerid': None,
-    'committee_name': None,
-    'candidate_name': None,
-    'total': None,
+    'filerid': '',
+    'committee_name': '',
+    'candidate_name': '',
+    'total': 0.0,
     'top_5_corporates': [],
     'top_5_pacs': [],
     'breakdown': [],
