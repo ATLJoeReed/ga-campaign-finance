@@ -17,7 +17,8 @@ select
 from campaign_finance.fact_contributions as a
 cross join count_all_donations as b
 where a.filerid = '{filerid}'
-    and coalesce(a.election_year, extract(year from a.contribution_date)) = 2020
+    and a.contribution_date between '{start_date}' and '{end_date}'
+    -- and coalesce(a.election_year, extract(year from a.contribution_date)) = 2020
     and a.contribution_type = 'Monetary'
 group by a.donation_type, b.total_number_donations
 order by a.donation_type;
@@ -33,7 +34,8 @@ from campaign_finance.fact_contributions as a
     inner join campaign_finance.dim_campaigns as b
         on a.filerid = b.filerid
 where a.filerid = '{filerid}'
-    and coalesce(a.election_year, extract(year from contribution_date)) = 2020
+    and a.contribution_date between '{start_date}' and '{end_date}'
+    -- and coalesce(a.election_year, extract(year from contribution_date)) = 2020
     and contribution_type = 'Monetary'
 group by a.filerid, b.committee_name, b.candidate_firstname, b.candidate_middlename, b.candidate_lastname, b.candidate_suffix;
 """ # noqa
@@ -44,7 +46,8 @@ select
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
 where filerid = '{filerid}'
-    and coalesce(election_year, extract(year from contribution_date)) = 2020
+    and a.contribution_date between '{start_date}' and '{end_date}'
+    -- and coalesce(election_year, extract(year from contribution_date)) = 2020
     and contribution_type = 'Monetary'
     and donation_type = 'Corporate'
 group by lastname
@@ -58,7 +61,8 @@ select
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
 where filerid = '{filerid}'
-    and coalesce(election_year, extract(year from contribution_date)) = 2020
+    and a.contribution_date between '{start_date}' and '{end_date}'
+    -- and coalesce(election_year, extract(year from contribution_date)) = 2020
     and contribution_type = 'Monetary'
     and donation_type = 'Political Action Committee (PAC)'
 group by lastname
