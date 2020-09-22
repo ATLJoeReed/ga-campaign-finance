@@ -4,8 +4,7 @@ GET_BREAKOUT_BY_TYPE_SQL = """
 with count_all_donations as
 (
     select
-        count(*) as total_number_donations,
-        max()
+        count(*) as total_number_donations
     from campaign_finance.fact_contributions
     where filerid = '{filerid}'
         and contribution_date between '{start_date}' and '{end_date}'
