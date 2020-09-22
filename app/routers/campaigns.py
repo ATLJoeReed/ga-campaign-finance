@@ -48,7 +48,14 @@ def get_campaign_summary(filerid: str, start_date: datetime.date, end_date: date
 
     - Query Example: ?filerid=**C2020000196**?start_date=**2019-06-30**?end_date=**2020-09-22**
     """ # noqa
-    params = {'filerid': filerid, start_date: start_date, end_date: end_date}
+
+    params = {
+        'filerid': filerid,
+        'start_date': start_date,
+        'end_date': end_date
+    }
+
+    print(params)
 
     sql = constants_sql.GET_BREAKOUT_BY_TYPE_SQL
     breakout = helpers.extract_data(sql, params)
