@@ -2,6 +2,38 @@ set search_path to raw, stage, working, campaign_finance;
 
 show search_path;
 
+select *
+from stage.ethics_report;
+
+------------------------------------------------------------------------------------------------------------------------
+-- Inject 2019 contributions...
+------------------------------------------------------------------------------------------------------------------------
+alter table raw.ethics_report_2019_all_20200922
+    add column id serial,
+    add column ukey text;
+
+update raw.ethics_report_2019_all_20200922 set ukey = '2019_' || id::text;
+
+insert into stage.ethics_report
+    (ukey, filerid, committee_name, candidate_firstname, candidate_middlename,
+    candidate_lastname, candidate_suffix, firstname, lastname, employer,
+    occupation, address, city, state, zip, contribution_date, contribution_type,
+    pac, election, election_year, cash_amount, in_kind_amount, in_kind_description)
+select ukey, filerid, committee_name, candidate_firstname, candidate_middlename,
+    candidate_lastname, candidate_suffix, firstname, lastname, employer,
+    occupation, address, city, state, zip, date::date, type,
+    pac, election, election_year,
+    cash_amount, in_kind_amount, in_kind_description
+from raw.ethics_report_2019_all_20200922;
+------------------------------------------------------------------------------------------------------------------------
+-- End Inject 2019 contributions...
+------------------------------------------------------------------------------------------------------------------------
+
+select
+    extract('year' from contribution_date) as contribution_year,
+    count(*) as num_contributions
+from stage.ethics_report
+group by extract('year' from contribution_date)
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Put the NULLs back inplace...
@@ -25,7 +57,6 @@ update stage.ethics_report set in_kind_description = null where coalesce(in_kind
 
 select *
 from stage.ethics_report;
-
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Cleanup "" in name fields...
@@ -340,7 +371,7 @@ with pacs as
     from working.committee_info
     where committeetype = 'Political Action Committee'
 )
-select distinct a.lastname
+select distinct a.donation_type, a.lastname
 from stage.ethics_report as a
     inner join pacs as b
         on trim(a.lastname) = trim(b.committeename)
@@ -356,7 +387,7 @@ order by lastname;
 delete
 -- select count(*) as cnt
 from campaign_finance.fact_contributions
-where extract(year from contribution_date) = 2020;
+where extract(year from contribution_date) = 2019;
 -- 71287
 
 select count(*) as cnt
@@ -396,6 +427,18 @@ from campaign_finance.fact_contributions
 where extract(year from contribution_date) != 2020
 limit 5000;
 
+select
+    extract(year from contribution_date) as contribution_year,
+    count(*) as num_contributions
+from campaign_finance.fact_contributions
+group by extract(year from contribution_date)
+order by contribution_year;
+-- contribution_year	num_contributions
+-- 2017	                91310
+-- 2018	                277411
+-- 2019	                109330
+-- 2020	                71336
+
 
 -- Fix one committee_name so we are unique in the dim table...
 update stage.ethics_report
@@ -426,6 +469,14 @@ order by a.filerid;
 select *
 from campaign_finance.dim_campaigns
 order by ymd desc;
+
+update campaign_finance.dim_campaigns
+    set is_pac = False
+where filerid = 'C2020000195';
+
+
+
+-- Old items ???
 
 select *
 from campaign_finance.dim_campaigns;
