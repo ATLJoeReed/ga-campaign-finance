@@ -24,7 +24,7 @@ group by a.donation_type, b.total_number_donations
 order by a.donation_type;
 """ # noqa
 
-GET_CAMPAIGH_SUMMARY_SQL = """
+GET_CONTRIBUTION_SUMMARY_SQL = """
 select
     a.filerid,
     b.committee_name,
@@ -65,4 +65,26 @@ where filerid = '{filerid}'
 group by lastname
 order by amount desc
 limit 5;
+"""
+
+GET_ALL_CANDIDATES_SQL = """
+select
+    filerid,
+    committee_name,
+    candidate_firstname,
+    candidate_middlename,
+    candidate_lastname,
+    candidate_suffix
+from campaign_finance.dim_campaigns
+where left(filerid, 1) = 'C'
+order by candidate_lastname, candidate_firstname;
+"""
+
+GET_ALL_COMMITTEES_SQL = """
+select
+    filerid,
+    committee_name
+from campaign_finance.dim_campaigns
+where left(filerid, 2) = 'NC'
+order by committee_name;
 """

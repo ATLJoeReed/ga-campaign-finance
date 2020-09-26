@@ -94,3 +94,25 @@ group by a.donation_type, b.total_number_donations
 order by a.donation_type;
 
 
+
+select
+    filerid,
+    committee_name,
+    candidate_firstname,
+    candidate_middlename,
+    candidate_lastname,
+    candidate_suffix
+from campaign_finance.dim_campaigns
+where left(filerid, 1) = 'C'
+order by candidate_lastname, candidate_firstname;
+
+
+select
+    filerid,
+    committee_name
+from campaign_finance.dim_campaigns
+where left(filerid, 2) = 'NC'
+order by committee_name;
+
+
+

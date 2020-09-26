@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI
 
-from app.routers import campaigns, health_check
+from app.routers import campaigns, contributions, health_check
 
 
 app = FastAPI(
@@ -13,3 +13,4 @@ app = FastAPI(
 
 app.include_router(health_check.router, prefix='/api', tags=['Admin'])
 app.include_router(campaigns.router, prefix='/api', tags=['Campaigns'])
+app.include_router(contributions.router, prefix='/api', tags=['Contributions'])

@@ -1,6 +1,6 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
-CAMPAIGN_SUMMARY_SHELL = {
+CONTRIBUTION_SUMMARY_SHELL = {
     'filerid': '',
     'committee_name': '',
     'candidate_name': '',
