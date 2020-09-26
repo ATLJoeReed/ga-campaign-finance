@@ -1,7 +1,7 @@
 #!/usr/bin/python3.8
 # -*- coding: utf-8 -*-
 import datetime
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -31,7 +31,7 @@ class BreakoutByType(BaseModel):
 
 class ContributionSummary(BaseModel):
     filerid: str
-    committee_name: str
+    committee_name: Optional[str]
     candidate_name: str
     total: float
     top_5_corporates: List[Top5Corporations]
