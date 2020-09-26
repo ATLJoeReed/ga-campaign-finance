@@ -6,6 +6,7 @@ import sys
 
 import pandas.io.sql as psql
 import psycopg2
+import tenacity
 
 
 def extract_data(sql, params=None):
@@ -25,6 +26,7 @@ def extract_dataframe(sql, params=None):
     return df
 
 
+@tenacity.retry(stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_fixed(2)) # noqa
 def get_database_connection():
     return psycopg2.connect(
         dbname=os.environ.get('DATABASE'),

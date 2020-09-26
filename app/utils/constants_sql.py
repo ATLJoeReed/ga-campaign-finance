@@ -41,28 +41,28 @@ group by a.filerid, b.committee_name, b.candidate_firstname, b.candidate_middlen
 
 GET_TOP_5_CORPORATIONS_SQL = """
 select
-    lastname as name,
+    coalesce(lastname, firstname) as name,
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
 where filerid = '{filerid}'
     and contribution_date between '{start_date}' and '{end_date}'
     and contribution_type = 'Monetary'
     and donation_type = 'Corporate'
-group by lastname
+group by coalesce(lastname, firstname)
 order by amount desc
 limit 5;
 """
 
 GET_TOP_5_PACS_SQL = """
 select
-    lastname as name,
+    coalesce(lastname, firstname) as name,
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
 where filerid = '{filerid}'
     and contribution_date between '{start_date}' and '{end_date}'
     and contribution_type = 'Monetary'
     and donation_type = 'Political Action Committee (PAC)'
-group by lastname
+group by coalesce(lastname, firstname)
 order by amount desc
 limit 5;
 """
