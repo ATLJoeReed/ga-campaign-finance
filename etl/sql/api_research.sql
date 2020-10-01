@@ -17,29 +17,50 @@ group by a.filerid, b.committee_name, b.candidate_firstname, b.candidate_middlen
 
 -- Top 5 PAC Donors
 select
-    lastname as name,
+    coalesce(lastname, firstname) as name,
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
 where filerid = 'C2020000517'
     and coalesce(election_year, extract(year from contribution_date)) = 2020
     and contribution_type = 'Monetary'
     and donation_type = 'Political Action Committee (PAC)'
-group by lastname
+group by coalesce(lastname, firstname)
 order by amount desc
 limit 5;
 
 -- Top 5 Corporate Donors...
 select
-    lastname as name,
+    coalesce(lastname, firstname) as name,
     sum(cash_amount) as amount
 from campaign_finance.fact_contributions
-where filerid = 'C2020000517'
+where filerid = 'C2020000305'
     and coalesce(election_year, extract(year from contribution_date)) = 2020
     and contribution_type = 'Monetary'
     and donation_type = 'Corporate'
-group by lastname
+group by coalesce(lastname, firstname)
 order by amount desc
 limit 5;
+
+select *
+from dim_campaigns
+where filerid = 'C2020000305'
+
+select *
+from fact_contributions
+where filerid = 'C2020000305'
+    and donation_type = 'Corporate'
+
+select *
+from fact_contributions
+where donation_type = 'Corporate'
+    and lastname is null;
+
+select *
+from fact_contributions
+where donation_type = 'Political Action Committee (PAC)'
+    and lastname is null;
+
+
 
 -- Breakout By Type...
 with count_all_donations as
