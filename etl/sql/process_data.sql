@@ -8,11 +8,11 @@ from stage.ethics_report;
 ------------------------------------------------------------------------------------------------------------------------
 -- Inject 2019 contributions...
 ------------------------------------------------------------------------------------------------------------------------
-alter table raw.ethics_report_2019_all_20200922
+alter table raw.ethics_report_2019_all_20201003
     add column id serial,
     add column ukey text;
 
-update raw.ethics_report_2019_all_20200922 set ukey = '2019_' || id::text;
+update raw.ethics_report_2019_all_20201003 set ukey = '2019_' || id::text;
 
 insert into stage.ethics_report
     (ukey, filerid, committee_name, candidate_firstname, candidate_middlename,
@@ -24,7 +24,7 @@ select ukey, filerid, committee_name, candidate_firstname, candidate_middlename,
     occupation, address, city, state, zip, date::date, type,
     pac, election, election_year,
     cash_amount, in_kind_amount, in_kind_description
-from raw.ethics_report_2019_all_20200922;
+from raw.ethics_report_2019_all_20201003;
 ------------------------------------------------------------------------------------------------------------------------
 -- End Inject 2019 contributions...
 ------------------------------------------------------------------------------------------------------------------------
@@ -33,10 +33,10 @@ select
     extract('year' from contribution_date) as contribution_year,
     count(*) as num_contributions
 from stage.ethics_report
-group by extract('year' from contribution_date)
+group by extract('year' from contribution_date);
 
 ------------------------------------------------------------------------------------------------------------------------
--- Put the NULLs back inplace...
+-- Put the NULLs back in place...
 ------------------------------------------------------------------------------------------------------------------------
 update stage.ethics_report set committee_name = null where coalesce(committee_name, '') = '';
 update stage.ethics_report set candidate_firstname = null where coalesce(candidate_firstname, '') = '';
@@ -360,6 +360,16 @@ from working.pacs as b
 where trim(a.lastname) = trim(b.pac_name)
     and a.donation_type = 'Corporate';
 
+-- Per Walter via email 2020.10.02
+select *
+from stage.ethics_report
+where lastname ilike '%Fair%Fight%';
+
+update stage.ethics_report
+    set donation_type = 'Political Action Committee (PAC)'
+where lastname ilike '%Fair%Fight%';
+
+
 -- NEED MORE INSIGHT ABOUT PACs BEFORE TAGGING MORE OF THEM...
 -- I have working.committee_info that might could be used to tag additional
 -- PACs...
@@ -387,13 +397,15 @@ order by lastname;
 delete
 -- select count(*) as cnt
 from campaign_finance.fact_contributions
-where extract(year from contribution_date) = 2019;
--- 71287
+where extract(year from contribution_date) = 2020;
+-- 2019: 109330
+-- 2020: 71336
 
 select count(*) as cnt
 from stage.ethics_report
-where extract(year from contribution_date) = 2020;
--- 71328
+where extract(year from contribution_date) = 2019;
+-- 2019: 109332
+-- 2020: 74179
 
 insert into campaign_finance.fact_contributions
     (ukey, filerid, donation_type, firstname, lastname, employer, occupation, address,
@@ -436,8 +448,8 @@ order by contribution_year;
 -- contribution_year	num_contributions
 -- 2017	                91310
 -- 2018	                277411
--- 2019	                109330
--- 2020	                71336
+-- 2019	                109332
+-- 2020	                74179
 
 
 -- Fix one committee_name so we are unique in the dim table...
@@ -447,7 +459,7 @@ where filerid = 'C2018000163';
 
 select count(distinct filerid) as cnt
 from stage.ethics_report;
--- 777
+-- 966
 
 -- truncate table campaign_finance.dim_campaigns;
 
@@ -472,8 +484,21 @@ order by ymd desc;
 
 update campaign_finance.dim_campaigns
     set is_pac = False
+where is_pac is null;
+
+update campaign_finance.dim_campaigns
+    set is_pac = False
 where filerid = 'C2020000195';
 
+update campaign_finance.dim_campaigns
+    set is_pac = True
+where filerid in ('NC2020000051', 'NC2019000029');
+
+select *
+from campaign_finance.dim_campaigns
+where is_pac
+--     and left(filerid, 1) = 'C'
+order by committee_name;
 
 
 -- Old items ???
